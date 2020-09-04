@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cmd1-spec
+  namespace: test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test-container
+      image: busybox
+      command: ["/bin/sh","-c","echo $(SPEC_A) $(SPEC_B) $(C)"]
+      env: 
+        - name: SPEC_A
+          valueFrom:
+            configMapKeyRef:
+              name: spec-config
+              key: spec.a
+        - name: SPEC_B
+          valueFrom:
+            configMapKeyRef:
+              name: spec-config
+              key: spec.b
+        - name: C
+          value: helloworld
+      
+
+

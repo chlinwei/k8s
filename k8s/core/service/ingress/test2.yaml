@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test2
+spec:
+  rules:
+    - host: www.test2.com
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: httpd-svc-v2
+            servicePort: 8882

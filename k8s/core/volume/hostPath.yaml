@@ -1,0 +1,32 @@
+#hostPath卷将主机节点的文件系统种的文件或者目录挂载到集群中
+#hostPath的作用:
+#1)运行需要访问Docker内部的容器:使用/var/lib/docker的hostPath
+#2)在容器中运行cAdvisor:使用/dev/cgroups的hostPath
+#
+#值   行为
+#空                空字符串(默认),挂载hostPath卷前不会有任何检查
+#DirectoryOrCreate 指定的路径不存在,那么将创建一个空目录,权限0755,和kubelet具有相同的组和所有权
+#Directory         给定的路径必须存在目录
+#FileOrCreate      指定的路径不存在则创建一个空文件，权限是0644,和kubelet具有相同的组和所有权
+#File              给定的路径必须存在文件
+#Socket            给定的路径必须存在UNIX套接字
+#CharDevice        给定的路径必须存在字符设备
+#BlockDevice       给定的路径必须存在块设备
+
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: pod-hostpath
+spec:
+  containers:
+  - image: httpd:v1
+    name: con1
+    volumeMounts:
+    - mountPath: /test1
+      name: dir-volume
+  volumes:
+  - name: dir-volume
+    hostPath:
+      path: /test1
+      type: DirectoryOrCreate
+

@@ -1,0 +1,28 @@
+#通过nodeName来将pod指定到某个节点上创建
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-deployment
+  labels:
+    app: httpd-deployment
+spec: 
+  replicas: 3
+  selector: 
+    matchLabels: 
+      app: httpd-pod
+  template:
+    metadata:
+      labels:
+        app: httpd-pod
+    spec:
+      nodeSelector:
+      #kubectl label node master1 label1=value1 这样这个pod才会到这个节点上创建
+        label1: value1
+      containers:
+      - name: httpd-container
+        image: httpd:v1
+        ports:
+        - containerPort: 80
+
+
+  

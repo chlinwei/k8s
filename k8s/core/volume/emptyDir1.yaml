@@ -1,0 +1,31 @@
+#概述:emptyDir类型的volume在pod分配到node上时被创建，kubernetes会在node上自动分配
+#一个目录，因此无需指定宿主机node上对应的目录文件。
+#这个目录的初始内容为空，当Pod从node上移除时，emptyDir中的数据会被永久删除。
+#作用：
+#1.暂存空间
+#2.用作长时间计算崩溃恢复的检查点
+#3.Web服务器容器提供数据时，保存内容管理器提取的文件
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-emptydir
+  namespace: default
+spec:
+  containers:
+  - image: httpd:v1
+    name: con1
+    volumeMounts:
+    - mountPath: /test1
+      name: cache-volume
+  - image: httpd:v3
+    name: con3
+    volumeMounts:
+    - mountPath: /test3
+      name: cache-volume
+
+  volumes:
+  - name: cache-volume
+    emptyDir: {}
+
+
+

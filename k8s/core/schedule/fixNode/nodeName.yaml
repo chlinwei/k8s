@@ -1,0 +1,26 @@
+#通过nodeName来将pod指定到某个节点上创建
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-deployment
+  labels:
+    app: httpd-deployment
+spec: 
+  replicas: 3
+  selector: 
+    matchLabels: 
+      app: httpd-pod
+  template:
+    metadata:
+      labels:
+        app: httpd-pod
+    spec:
+      nodeName: master1
+      containers:
+      - name: httpd-container
+        image: httpd:v1
+        ports:
+        - containerPort: 80
+
+
+  

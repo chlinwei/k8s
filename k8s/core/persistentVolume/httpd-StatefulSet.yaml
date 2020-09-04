@@ -1,0 +1,74 @@
+#创建个无头服务给statefulset使用
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpd
+  labels:
+     app: httpd-svc
+spec:
+  ports: 
+  - name: http-80
+    port: 8887
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: pod-httpd
+  clusterIP: "None"
+
+
+---
+###StatefulSet的每个pod如果新建后，pod的名词还是一样的,即pod域名还是一样
+#StatefulSet为每个pod创建了一个DNS域名,格式:podname.无头服务名称.default.svc.cluster.local
+#StatefulSet使用headless服务来控制Pod的域名,这个域名的FQDN为:serverName.namespace.svc.cluster.local,其中cluster.local是集群的域名
+#销毁时，应销毁statefulset此时也会自动销毁pod,接着继续手动销毁pvc,pv,svc
+#
+#StatefulSet使用场景
+#1.稳定的持久化存储
+#2.稳定的网络标识，即pod的PodName和hostName不变化
+#3.有序部署，有序扩展，基于init.containers来实现
+#4.有序收缩
+#
+#
+##如果pv时Released状态，如果让它恢复到avaiable状态呢,首先rm -rf /nfsdata1 ,然后在 kubectl edit pv pod-nfs 删除如下内容 ,此时就是avaiable了
+#claimRef:
+#  apiVersion: v1
+#  kind: PersistentVolumeClaim
+#  name: www-pod-statefulset-1
+#  namespace: default
+#  resourceVersion: "763257"
+#  uid: 09a76790-a51c-4f90-92e0-e0d8981d838b
+#
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pod-statefulset
+spec:
+  selector:
+    matchLabels:
+      app: pod-httpd
+  serviceName: httpd  #这里必须和上面的无头服务的name一样
+  replicas: 2 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: pod-httpd # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: pod1-con1
+        image: httpd:v1
+        ports:
+        - containerPort: 80
+          name: httpd-port
+        volumeMounts:
+        - name: www
+          mountPath: /var/www/html
+  volumeClaimTemplates:   #可看作pvc的模板
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "nfsv1"  #存储类名，改为集群中已存在的
+      resources:
+        requests:
+          storage: 1Gi

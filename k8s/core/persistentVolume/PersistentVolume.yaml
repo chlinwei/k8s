@@ -1,0 +1,67 @@
+#accessMode:
+#1)ReadWriteOnce-该卷可以被单个节点以读/写模式挂载
+#2)ReadOnlyMany -该卷可以被多个节点以只读模式挂载
+#3)ReadWriteMany-该卷可以被多个节点以读/写模式挂载
+#
+##回收策略
+#Retain(保留) -- 手动回收,如果pv不被使用了，也要等管理员去手动管理
+#Recyle(回收) -- 基本擦除,删除卷里的所有内容
+#Delete(删除) -- 关联的存储资产(AWS EBS,GCE PD,Azure Disk,Openstack卷等)将被删除
+#当前只有NFS和HostPath支持回收策略AWS EBS,GCE PD,Azure Disk,Openstack卷支持删除策略,
+#
+#
+##状态
+#Available(可用):空闲的资源
+#Bound(已绑定):已经有pod把这个pv绑定了
+#Released(已释放):被删除了,但是还得等待一段时间就可用了
+#Failed(失败):该卷的自动回收失败
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pod1-nfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  #随便乱写storageClassName
+  storageClassName: nfsv1
+  nfs:
+    path: /nfsdata1/html
+    server: 192.168.230.131
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pod2-nfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  #随便乱写storageClassName
+  storageClassName: nfsv1
+  nfs:
+    path: /nfsdata2
+    server: 192.168.230.131
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pod3-nfs
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  #随便乱写storageClassName
+  storageClassName: nfsv1
+  nfs:
+    path: /nfsdata3
+    server: 192.168.230.131
+

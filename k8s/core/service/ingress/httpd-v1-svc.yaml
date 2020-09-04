@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpd-svc-v1
+  labels:
+    app: httpd-svc-v1
+spec:
+  ports: 
+  - name: http-80
+    port: 8881
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: httpd-pod-v1
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-deployment-v1
+  labels:
+    app: httpd-deployment-v1
+spec: 
+  replicas: 2
+  selector: 
+    matchLabels: 
+      app: httpd-pod-v1
+  template:
+    metadata:
+      labels:
+        app: httpd-pod-v1
+    spec:
+      containers:
+      - name: httpd-container-v1
+        image: httpd:v1
+        ports:
+        - containerPort: 80
+
+

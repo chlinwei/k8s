@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volumn1-spec
+  namespace: test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test-container
+      image: busybox
+      command: ["/bin/sh","-c","cat /etc/config/spec.a"]
+      volumeMounts:
+      
