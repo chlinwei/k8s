@@ -1,0 +1,117 @@
+鉴权策略：
+1)AlwaysDeny:拒绝所有请求,一般用于测试
+2)AlwaysAllow:允许所有请求,如果集群不需要授权则可以采用此策略
+3)ABAC(Attribute-Based Access Control):基于属性的访问控制,表示使用用户配置的授权规则对
+用户访问请求进行匹配和控制,这种方式配置太复杂
+4)Webbook:用户两个外部REST服务对用户进行授权
+5)RRBAC(Role-Based Access Control):基于角色的访问控制，现行默认规则
+
+
+
+RBAC优势:
+1)整个RBAC全由由几个API对象完成，可以由kubectl或者API进行操作
+2)可以在运行期间调整，无需重启API Server
+
+
+
+
+用户在向CA申请证书时，需要提供一个证书文件请求
+{
+  "CN": "devuser",
+  "hosts": [],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "BeiJing",
+      "L": "BeiJing",
+      "O": "k8s",
+      "OU": "System"
+    }
+  ]
+}
+
+API Server会把CN字段当作User,把names.O字段当作group
+
+
+
+
+
+
+Role表示一组规则权限，Role可以定义在一个namespace中，如果想要跨多个namespace可以创建
+ClusterRole
+
+ClusterRole比Role多的权限:
+1)集群级别的资源控制(例如Node访问控制)
+2)非资源型endpoints(例如/healthz访问)
+3)所有命名空间资源控制(例如pods)
+
+
+
+
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  namespace: default
+  name: pod-reader
+rules:
+- apiGroups: [""] # 空字符串""表明使用core API group
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]
+
+
+
+
+
+
+
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: read-pods
+  namespace: default
+subjects:
+- kind: User
+  name: Caden
+ apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+
+
+
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+ name: read-pods-global
+subjects:
+- kind: Group
+ name: pods-reader
+ apiGroup: rbac.authorization.k8s.io
+roleRef:
+ kind: ClusterRole
+ name: pods-reader
+ apiGroup: rbac.authorization.k8s.io
+
+
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: read-pods
+  namespace: development # 这里表明仅授权读取"development" namespace中的资源，若不定义该字段，则表示整个集群的Pod资源都可访问
+subjects:
+- kind: ServiceAccount
+  name: reader-dev
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: pod-reader
+  namespace: kube-system

@@ -1,0 +1,24 @@
+1.查看当前所有的chart
+helm list
+
+2.安装chart
+helm  install .
+
+3.卸载和恢复chart
+helm delete chartName
+helm delete chartName --purge (彻底删除)
+helm rollback chartName revision
+
+4.查看指定chart状态
+helm status chartName
+
+
+5.升级chart
+helm list 先查看chartName
+helm upgrade chartName . 
+
+6.查看删除后的chart
+helm list --deleted
+
+7.尝试运行下不会生成chart
+helm install --dry-run . 
