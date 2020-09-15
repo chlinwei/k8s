@@ -1,0 +1,18 @@
+#生存检测
+#检测主容器里的进程
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-pod
+  namespace: default
+spec:
+  containers:
+  - name: liveness-c
+    image: httpd:v1
+    livenessProbe:
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 1
+      #第一次检测完后，每三秒检测一次
+      periodSeconds: 3
+      timeoutSeconds: 10

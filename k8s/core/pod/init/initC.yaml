@@ -1,0 +1,36 @@
+#创建pod时首先创建pause容器，然后在执行一串Init容器(在网络卷和数据卷初始化后按照顺序执行,当然网络卷和数据卷是在初始化pause容器时进行的)
+#每个Init容器都必须在下一个Init容器启动之前完成
+#
+#如果Pod的Init容器失败，kubernetes会不断的重启该Pod,知道Init容器启动成功
+#如果Pod对应的restartPolicy为Never,则它不会重新启动,默认为Always
+#如果pod重启,则所有Init容器重新执行
+#对于init容器，只能修改image字段，其他字段修改后都不会生效，修改image就会重启该pod
+#init容器具有容器的所有字段，除了readlinessProbe,因为Init容器无法定义不同于完成(completion)的就绪(readliness)之外的其他状态
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  initContainers:
+  - name: initc1
+    image: httpd:v1
+    #command用来代替dockerFile里的CMD(为容器体提供默认的执行命令,ENTRYPOINT为容器提供默认参数),即指定了command则CMD不会被执行
+    #until条件为真退出循环
+    command: ['sh','-c','until nslookup myservice1;do echo waiting for myservice;sleep 2;done']
+  - name: initc2
+    image: httpd:v1
+    command: ['sh','-c','a=0;until nslookup myservice2;do echo waiting for myservice;sleep 7;let a=a+1;if [ "$a" -ge "2" ];then break ;fi done;exit -1']
+
+  containers:
+  - name: http
+    image: httpd:v1
+    command: ["sh","-c","echo The app is running && sleep 100"]
+  
+
+
+
+  

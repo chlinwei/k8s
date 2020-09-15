@@ -1,0 +1,22 @@
+#就绪检测
+#例如web服务器最开始就是Running状态就加到svc的后端池了，但此时不不一定就时真正的
+#可访问状态，说不定内部服务还在初始化，此时就需要readiness来手动检测是否初始化完毕,是否可以被
+#如果可用就是ready状态
+apiVersion: v1
+kind: Pod
+metadata:
+  name: readiness-http-pod
+  namespace: default
+spec:
+  containers:
+  - name: readiness-http-container
+    image: httpd:v1
+    readinessProbe:
+      httpGet:
+        port: 80
+        path: /index1.html
+      #容器启动后第一次执行探测是需要等待多少秒
+      initialDelaySeconds: 1
+      #
+      periodSeconds: 3
+    

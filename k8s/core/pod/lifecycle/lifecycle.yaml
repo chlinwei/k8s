@@ -1,0 +1,18 @@
+#InitC执行完毕后，则开始执行poststart,当然poststart和主容器是同时进行的
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  name: poststart
+spec:
+  containers:
+  - name: lifecycle-c
+    image: httpd:v1
+    lifecycle:
+      postStart:
+        exec: 
+          command: ["/bin/sh","-c","ps aux >> /var/www/html/index.html"]
+      preStop:
+        exec: 
+          command: ["/bin/sh","-c","curl 192.168.230.131"]
+        

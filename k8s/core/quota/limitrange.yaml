@@ -1,0 +1,15 @@
+#配置CPU和内存LimitRange
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: con-limit
+spec:
+  limits:
+  - default:
+      memory: 50Gi
+      cpu: 5
+    defaultRequest:
+      memory: 1Gi
+      cpu: 1
+    type: Container
+    
